@@ -7,12 +7,8 @@ public class Main {
         GraphDatabase db = GraphDatabase.createDatabase();
         //DataPopulator.populateGenreList(db);
         //DataPopulator.populateAnimeList(db);
-        DataPopulator.populateUsers(db);
-        System.out.println("Done");
-        while(true);
-        /*Map<String, Object> params = new HashMap<>();
-        params.put("nickname", "SomeFancyNick");
-        params.put("email", "abc@d.e");
-        db.addUser(params);*/
+        //DataPopulator.populateUsers(db);
+        System.out.println(db.allRelations("Petit", GraphDatabase.NodeTypes.USER));
+        System.out.println(db.shortestPath("Petit", "Fish"));
     }
 }

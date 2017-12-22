@@ -13,11 +13,11 @@ public final class GraphDatabase {
     private final GraphDatabaseService graphDatabaseService;
     private GraphDatabaseSettings.BoltConnector bolt = GraphDatabaseSettings.boltConnector( "0" );
     private static final String GRAPH_DIR_LOC = "./neo4j";
-    private static enum RelTypes implements RelationshipType
+    public static enum RelTypes implements RelationshipType
     {
         KNOWS, WATCHED, IS_KIND_OF
     }
-    private static enum NodeTypes implements Label
+    public static enum NodeTypes implements Label
     {
         USER, ANIME, GENRE
     }
@@ -119,8 +119,7 @@ public final class GraphDatabase {
         try (Transaction transaction = graphDatabaseService.beginTx()) {
             String query = String.format("match (u1:USER),(u2:USER) " +
                     "where u1.nickname='%s' and u2.nickname='%s' " +
-                    "create (u1)-[r1:KNOWS]->(u2) " +
-                    "create (u2)-[r2:KNOWS]->(u1)", user1, user2);
+                    "create (u1)-[r1:KNOWS]->(u2)", user1, user2);
             graphDatabaseService.execute(query);
             transaction.success();
         }
@@ -144,6 +143,22 @@ public final class GraphDatabase {
             graphDatabaseService.execute(query);
             transaction.success();
         }
+    }
+
+    public String allRelations(String key, NodeTypes type){
+        String value;
+        switch (type) {
+            case USER: value = String.format("{nickname: '%s'}", key); break;
+            case ANIME: value = String.format("{title: '%s'}", key); break;
+            case GENRE: value = String.format("{name: '%s'}", key); break;
+            default: value = ""; break;
+        }
+        return runCypher(String.format("match (n:%s %s)-[r]-(m) return n,r,m", type.toString(), value));
+    }
+
+    public String shortestPath(String user1, String user2){
+        return runCypher(String.format("match p = shortestPath((u1:USER {nickname: '%s'})-[*]-(u2:USER {nickname: '%s'})) return p",
+                user1, user2));
     }
 
     public void shutDown(){
